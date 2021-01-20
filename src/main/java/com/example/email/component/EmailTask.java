@@ -50,7 +50,7 @@ public class EmailTask {
     @Scheduled(cron = "0/30 * * * * ? ")
     public void getAndStoreEmail() {
 
-        System.out.println("第" + count + "次执行Scheduled Task");
+        System.out.println("第" + count++ + "次执行Scheduled Task");
 
         //初始化阶段：从用户信息表中拉取用户邮箱配置
         System.out.println("数据库读取用户邮箱配置:");

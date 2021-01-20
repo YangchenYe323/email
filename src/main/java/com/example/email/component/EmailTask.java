@@ -29,10 +29,10 @@ public class EmailTask {
     //存储服务
     @Autowired
     private StoreService storeService;
-
     //间隔十五分钟完成一次所有用户的
     //邮箱拉取，
     private static int TIME_DELAY = 15;
+
     //用于记录组数，将用户按照hashcode分成15组，
     //每分钟执行一组，以此分摊运行时间
     private int turn = 0;
@@ -42,32 +42,39 @@ public class EmailTask {
     //新收到的邮件
     private Map<Integer, Date> lastProcessedEmailDate;
 
+    int count = 1;
+
     /**
      *
      */
-    @Scheduled(cron = "0 0/1 * * * ? ")
+    @Scheduled(cron = "0/30 * * * * ? ")
     public void getAndStoreEmail() {
 
+        System.out.println("第" + count + "次执行Scheduled Task");
+
         //初始化阶段：从用户信息表中拉取用户邮箱配置
+        System.out.println("数据库读取用户邮箱配置:");
         users = storeService.getAllUserInfo();
-        /*for (UserInfo uInfo : users) {
-            System.out.println(uInfo.getId());
-            System.out.println(uInfo.getUsername());
-            System.out.println(uInfo.getPassword());
-            System.out.println(uInfo.getServer());
-            System.out.println(uInfo.getPort());
-        }*/
+        for (UserInfo uInfo : users) {
+            System.out.println("用户id： " + uInfo.getId());
+            System.out.println("用户邮箱地址： " + uInfo.getUsername());
+            System.out.println("用户授权码： " + uInfo.getPassword());
+            System.out.println("用户邮箱pop3服务器地址： " + uInfo.getServer());
+            System.out.println("用户邮箱pop3服务器端口号： " + uInfo.getPort());
+        }
         //从时间表中拉取收件时间信息
+        System.out.println("数据库读取用户最新已存邮件发送时间：");
         List<MailLastDate> dates = storeService.getAllDate();
         //使用此信息构建映射
         lastProcessedEmailDate = new HashMap<>();
         for (MailLastDate d: dates){
             lastProcessedEmailDate.put(d.getId(), d.getDate());
+            System.out.println("用户id： " + d.getId() + ", 最新已存邮件发送时间： " + d.getDate());
         }
 
         for (UserInfo userInfo : users) {
             //一分钟内只处理一批次的用户
-            if (/*userInfo.hashCode() % TIME_DELAY == turn*/true) {
+            if (userInfo.hashCode() % TIME_DELAY == turn) {
                 try {
                     String username = userInfo.getUsername();
                     String password = userInfo.getPassword();
@@ -168,7 +175,6 @@ public class EmailTask {
                 }
 
             }
-
             //组数轮换
             turn = (turn + 1) % TIME_DELAY;
         }

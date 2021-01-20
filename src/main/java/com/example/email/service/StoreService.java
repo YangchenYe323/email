@@ -8,13 +8,10 @@ import com.example.email.mapper.AttachmentMapper;
 import com.example.email.mapper.LastDateMapper;
 import com.example.email.mapper.MailMapper;
 import com.example.email.mapper.UserInfoMapper;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class StoreService {
@@ -45,6 +42,10 @@ public class StoreService {
 
     public void insertDate(MailLastDate mailLastDate){
         lastDateMapper.insert(mailLastDate);
+    }
+
+    public void insertUserInfo(UserInfo userInfo){
+        userInfoMapper.insert(userInfo);
     }
 
     public List<MailLastDate> getAllDate(){

@@ -1,11 +1,9 @@
 package com.example.email.domain;
 
-import java.util.List;
-
 public class Attachment {
 
     private int id;
-    private List<String> paths;
+    private String path;
 
     public int getId() {
         return id;
@@ -15,11 +13,11 @@ public class Attachment {
         this.id = id;
     }
 
-    public List<String> getPaths() {
-        return paths;
+    public String getPath() {
+        return path;
     }
 
-    public void setPaths(List<String> paths) {
-        this.paths = paths;
+    public void setPath(String path) {
+        this.path = path;
     }
 }

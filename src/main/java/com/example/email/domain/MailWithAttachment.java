@@ -1,20 +1,22 @@
 package com.example.email.domain;
 
+import java.util.List;
+
 public class MailWithAttachment {
 
     private Mail mail;
-    private Attachment attachment;
+    private List<Attachment> attachments;
 
-    public Attachment getAttachment() {
-        return attachment;
+    public List<Attachment> getAttachments() {
+        return attachments;
     }
 
     public Mail getMail() {
         return mail;
     }
 
-    public void setAttachment(Attachment attachment) {
-        this.attachment = attachment;
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
     }
 
     public void setMail(Mail mail) {

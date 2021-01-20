@@ -1,6 +1,7 @@
 package com.example.email.service;
 
 
+import com.example.email.domain.Attachment;
 import com.example.email.domain.Mail;
 import com.example.email.domain.MailWithAttachment;
 import com.sun.mail.pop3.POP3SSLStore;
@@ -12,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import java.io.*;
@@ -26,6 +26,7 @@ public class ReceiveService {
 
     @Autowired
     StoreService storeService;
+
 
     public MailWithAttachment getReceivedEmail(String username, String password, String server, int port) throws MessagingException, IOException {
 
@@ -86,9 +87,16 @@ public class ReceiveService {
             mail.setSubject(subject);
             mail.setSender(sender);
             mail.setUsername(username);
-            int id = storeService.insertMail(mail);
+            int id = storeService.insertMail(mail);//此时已经获得了数据库自动生成的id
 
-            System.out.println("id： " + id);
+            //附件对象
+            for(String path: attachmentPaths){
+                Attachment attachment = new Attachment();
+                attachment.setId(id);
+                attachment.setPath(path);
+                //存储附件对象
+                storeService.insertAttachment(attachment);
+            }
 
         }
 
@@ -200,12 +208,6 @@ public class ReceiveService {
         bis.close();
     }
 
-    /**
-     * 文本解码
-     * @param encodeText 解码MimeUtility.encodeText(String text)方法编码后的文本
-     * @return 解码后的文本
-     * @throws UnsupportedEncodingException
-     */
     public static String decodeText(String encodeText) throws UnsupportedEncodingException {
         if (encodeText == null || "".equals(encodeText)) {
             return "";

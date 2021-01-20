@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 
 public interface AttachmentMapper {
 
-    @Insert("INSERT INTO attachment VALUES(#{id}, #{path})")
+    @Insert("INSERT INTO attachments VALUES(#{id}, #{path})")
     int insert(Attachment attachment);
 
 }

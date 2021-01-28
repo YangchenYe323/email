@@ -1,111 +1,26 @@
-package com.example.email.service;
-
-
-import com.example.email.domain.Attachment;
-import com.example.email.domain.Mail;
-import com.example.email.domain.MailWithAttachment;
-import com.sun.mail.pop3.POP3SSLStore;
-import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+package com.example.email.Util;
 
 import javax.mail.*;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import java.io.*;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
-@Service
-public class ReceiveService {
+/**
+ * 处理javamail API中message对象的一些方法
+ */
+public class EmailProcessUtil {
 
-    @Autowired
-    StoreService storeService;
-
-
-    public MailWithAttachment getReceivedEmail(String username, String password, String server, int port) throws MessagingException, IOException {
-
-        Properties props = new Properties();
-        props.setProperty("mail.transport.protocol", "pop3");
-        props.setProperty("mail.pop3.host", server);
-        props.setProperty("mail.pop3.port", String.valueOf(port));
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.socketFactory.port", String.valueOf(port));
-
-        URLName url = new URLName("pop3", server, port, "", username, password);
-        Session session = Session.getInstance(props, null);
-        session.setDebug(false);
-        Store store = new POP3SSLStore(session, url);
-        store.connect();//登录
-
-        Folder folder = store.getFolder("INBOX");
-        folder.open(Folder.READ_WRITE);
-
-        Message[] messages = folder.getMessages();
-
-        for (Message message: messages){
-            //邮件主题
-            String subject = message.getSubject();
-            Address from = message.getFrom()[0];
-            //发件人地址
-            String sender = ((InternetAddress)from).getAddress();
-            //邮件内容
-            StringBuffer content = new StringBuffer();
-            getMailTextContent(message, content);
-
-            System.out.println("邮件的主题为: " + subject + "\t发件人地址为: " + sender);
-            System.out.println(message.getContentType());
-            System.out.println(message.isMimeType("multipart/*"));
-            System.out.println("邮件的内容为：");
-            System.out.println(content);
-            //message.writeTo(System.out);// 输出邮件内容到控制台
-
-            //邮件附件处理
-            String dir = Paths.get(".").toAbsolutePath().toString();
-            //System.out.println(dir);
-            //每一个收件人的附件存储在分别的目录下
-            String destDir = "./attachments/" + username + "/";
-            File file = new File(destDir);
-            if (!file.exists()){
-                System.out.println(file.mkdir());
-            }
-            List<String> attachmentPaths = new ArrayList<>();
-            if (isContainAttachment(message)){
-                saveAttachment(message, destDir, attachmentPaths);
-                System.out.println("邮件附件路径：");
-                System.out.println(attachmentPaths);
-            }
-
-            //邮件对象
-            Mail mail = new Mail();
-            mail.setContent(content.toString());
-            mail.setSubject(subject);
-            mail.setSender(sender);
-            mail.setUsername(username);
-            int id = storeService.insertMail(mail);//此时已经获得了数据库自动生成的id
-
-            //附件对象
-            for(String path: attachmentPaths){
-                Attachment attachment = new Attachment();
-                attachment.setId(id);
-                attachment.setPath(path);
-                //存储附件对象
-                storeService.insertAttachment(attachment);
-            }
-
-        }
-
-        folder.close(false);// 关闭邮件夹对象
-        store.close(); // 关闭连接对象
-
-        return null;
-    }
-
+    /**
+     * 获取邮件体正文并存储在StringBuffer中
+     * 邮件体结构: Part{multipart} -> [Part{text/plain}, Part{multipart} -> [Part[text]]]
+     * 递归扫描part，获取类型为text/plain的内容
+     * @param part 邮件体对象
+     * @param content 正文存储缓存
+     * @throws MessagingException
+     * @throws IOException
+     */
     public static void getMailTextContent(Part part, StringBuffer content) throws MessagingException, IOException {
         //示例附件contentType: text/plain; charset="US-ASCII"; name="1.txt"
         //示例主文本contentType：text/plain; charset="UTF-8"
@@ -129,6 +44,14 @@ public class ReceiveService {
         }
     }
 
+    /**
+     * 判断邮件体是否包含附件
+     * 递归扫描邮件体part，寻找disposition为Part.ATTACHMENT或Part.INLINE的邮件体，此为附件邮件体
+     * @param part 邮件体对象
+     * @return
+     * @throws MessagingException
+     * @throws IOException
+     */
     public static boolean isContainAttachment(Part part) throws MessagingException, IOException {
         boolean flag = false;
         if (part.isMimeType("multipart/*")) {
@@ -160,6 +83,16 @@ public class ReceiveService {
         return flag;
     }
 
+    /**
+     * 将邮件体附件保存到指定目录，并将生成的文件名压入列表
+     * @param part 邮件体对象
+     * @param destDir 指定目录
+     * @param attachmentPaths 文件名列表
+     * @throws UnsupportedEncodingException
+     * @throws MessagingException
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     public static void saveAttachment(Part part, String destDir, List<String> attachmentPaths) throws UnsupportedEncodingException, MessagingException,
             FileNotFoundException, IOException {
         if (part.isMimeType("multipart/*")) {
@@ -184,7 +117,7 @@ public class ReceiveService {
                     saveAttachment(bodyPart,destDir, attachmentPaths);
                 } else {
                     String contentType = bodyPart.getContentType();
-                    if (contentType.indexOf("name") != -1 || contentType.indexOf("application") != -1) {
+                    if (contentType.contains("name") || contentType.contains("application")) {
                         saveFile(bodyPart.getInputStream(), destDir, decodeText(bodyPart.getFileName()));
                     }
                 }
@@ -194,6 +127,13 @@ public class ReceiveService {
         }
     }
 
+    /**
+     * 保存文件帮助方法
+     * @param is 需要保存的输入流
+     * @param destDir 目标目录
+     * @param fileName 文件名字
+     * @throws IOException
+     */
     private static void saveFile(InputStream is, String destDir, String fileName)
             throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
@@ -216,6 +156,13 @@ public class ReceiveService {
         }
     }
 
-
+    /**
+     * 返回邮件的收件时间
+     * @param msg 邮件对象
+     * @return
+     */
+    public static Date getSentDate(Message msg) throws MessagingException {
+        return msg.getSentDate();
+    }
 
 }

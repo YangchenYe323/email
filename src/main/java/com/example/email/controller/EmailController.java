@@ -2,9 +2,6 @@ package com.example.email.controller;
 
 import com.example.email.domain.Mail;
 import com.example.email.domain.UserInfo;
-import com.example.email.service.EmailService;
-import com.example.email.service.ReceiveService;
-import com.example.email.service.StoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,15 +10,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class EmailController {
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    ReceiveService receiveService;
-
-    @Autowired
-    StoreService storeService;
 
     @RequestMapping("/insert")
     @ResponseBody
@@ -53,7 +41,6 @@ public class EmailController {
         userInfo.setServer(server);
         userInfo.setPort(port);
 
-        emailService.insertUserInfo(userInfo);
 
         return "Success";
     }

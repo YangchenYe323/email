@@ -5,6 +5,11 @@ public class Attachment {
     private int id;
     private String path;
 
+    public Attachment(int id, String path){
+        this.id = id;
+        this.path = path;
+    }
+
     public int getId() {
         return id;
     }

@@ -5,7 +5,7 @@ import com.example.email.domain.Mail;
 import com.example.email.domain.UserInfo;
 import com.example.email.mapper.MailMapper;
 import com.example.email.mapper.UserInfoMapper;
-import com.example.email.service.EmailFetchService;
+import com.example.email.service.EmailClientService;
 import com.example.email.service.EmailStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,16 +27,15 @@ public class EmailTask {
     @Autowired
     EmailStoreService emailStoreService;
     @Autowired
-    EmailFetchService emailFetchService;
+    EmailClientService emailClientService;
     //当前轮次
     int turn = 0;
 
     /**
      *
      */
-    @Scheduled(cron = "0 * 0/1 * * * ? ")
+    @Scheduled(cron = "0/1 * * * * ? ")
     public void getAndStoreEmail() {
-        System.out.println("执行");
         //获取用户信息
         List<UserInfo> users = userInfoMapper.getAll();
         for(UserInfo user: users){
@@ -44,8 +43,8 @@ public class EmailTask {
             if (user.hashCode() % EmailConstants.TIME_DELAY == turn){
                 try{
                     //获取已经存储的最新邮件时间，只有更新的才需要处理
-                    Date date = mailMapper.getLastSentDateFor(user.getUsername());
-                    List<Mail> mails = emailFetchService.getMailFor(user, date);
+                    Date date = mailMapper.getLatestReceiveDateFor(user.getUserName());
+                    List<Mail> mails = emailClientService.getMailFor(user, date);
                     for (Mail mail: mails){
                         emailStoreService.save(mail);
                     }

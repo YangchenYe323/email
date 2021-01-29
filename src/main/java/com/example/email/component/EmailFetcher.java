@@ -4,8 +4,6 @@ import com.example.email.Util.EmailProcessUtil;
 import com.example.email.domain.Mail;
 import com.example.email.domain.UserInfo;
 import com.sun.mail.pop3.POP3SSLStore;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -17,13 +15,12 @@ import java.util.Properties;
 
 /**
  * 封装了javamail API的邮箱服务器访问对象，使用流程：
- * 初始化（提供用户邮箱配置和协议类型（收件pop3，发件smtp） ->
+ * 初始化（提供用户邮箱配置和协议类型（pop3） ->
  * 建立连接 ->
- * 收件方法获取Mail对象/发件方法发送邮件->
+ * 收件方法获取Mail对象->
  * 关闭连接
  */
-@Component
-public class EmailHandler {
+public class EmailFetcher {
     /**
      * 初始化信息：用户邮箱配置
      */
@@ -32,7 +29,6 @@ public class EmailHandler {
     URLName url;
     Session session;
     Store store;
-    Transport transport;
 
     /**
      * 初始化
@@ -43,13 +39,13 @@ public class EmailHandler {
         //初始化特性设置
         Properties props = new Properties();
         props.setProperty("mail.transport.protocol", "pop3");
-        props.setProperty("mail.pop3.host", userInfo.getServer());
-        props.setProperty("mail.pop3.port", String.valueOf(userInfo.getPort()));
+        props.setProperty("mail.pop3.host", userInfo.getPopServer());
+        props.setProperty("mail.pop3.port", String.valueOf(userInfo.getPopPort()));
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.socketFactory.port", String.valueOf(userInfo.getPort()));
+        props.put("mail.smtp.socketFactory.port", String.valueOf(userInfo.getPopPort()));
 
         //连接地址
-        url = new URLName("pop3", userInfo.getServer(), userInfo.getPort(), "", userInfo.getUsername(), userInfo.getPassword());
+        url = new URLName("pop3", userInfo.getPopServer(), userInfo.getPopPort(), "", userInfo.getUserName(), userInfo.getPassword());
         session = Session.getInstance(props);
         store = new POP3SSLStore(session, url);
     }
@@ -77,7 +73,7 @@ public class EmailHandler {
         for (Message msg: messages){
             if (threshold == null || threshold.before(msg.getSentDate())){
                 //获取邮件正文信息
-                String username = userInfo.getUsername();
+                String username = userInfo.getUserName();
                 String subject = msg.getSubject();
                 String sender = ((InternetAddress)msg.getFrom()[0]).getAddress();
                 StringBuffer contentBuffer = new StringBuffer();
@@ -91,11 +87,11 @@ public class EmailHandler {
                 }
                 //邮件对象
                 Mail mail = new Mail();
-                mail.setUsername(username);
-                mail.setSender(sender);
+                mail.setReceiverName(username);
+                mail.setSenderName(sender);
                 mail.setSubject(subject);
                 mail.setContent(content);
-                mail.setSentDate(msg.getSentDate());
+                mail.setReceiveDate(msg.getSentDate());
                 mail.setPaths(attachmentPaths);
 
                 receivedMails.add(mail);

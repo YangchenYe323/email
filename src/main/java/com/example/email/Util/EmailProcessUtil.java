@@ -1,6 +1,8 @@
 package com.example.email.Util;
 
 import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import java.io.*;
@@ -163,6 +165,28 @@ public class EmailProcessUtil {
      */
     public static Date getSentDate(Message msg) throws MessagingException {
         return msg.getSentDate();
+    }
+
+    /**
+     * 创建一封只包含文本的简单邮件
+     *
+     * @param session 和服务器交互的会话
+     * @param sendMail 发件人邮箱
+     * @param receiveMail 收件人邮箱
+     * @return
+     * @throws Exception
+     */
+    public static MimeMessage createMimeMessage(Session session, String sendMail, String receiveMail, String subject, String context) throws Exception {
+
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(sendMail, sendMail, "UTF-8"));
+        message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(receiveMail, receiveMail, "UTF-8"));
+        message.setSubject(subject, "UTF-8");
+        message.setContent(context, "text/html;charset=UTF-8");
+        message.setSentDate(new Date());
+        message.saveChanges();
+
+        return message;
     }
 
 }

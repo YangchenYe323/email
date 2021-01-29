@@ -10,42 +10,44 @@ import java.util.List;
 public class Mail {
 
     //邮件id
-    private int id;
+    private int mailId;
     //收件人地址
-    private String username;
+    private String receiverName;
     //邮件标题
     private String subject;
     //发件人地址
-    private String sender;
+    private String senderName;
     //邮件内容
     private String content;
     //收件时间
-    private Date sentDate;
+    private Date receiveDate;
+    //发件时间
+    private Date sendDate;
     //附件列表
     List<String> paths;
 
-    public int getId() {
-        return id;
+    public int getMailId() {
+        return mailId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setMailId(int mailId) {
+        this.mailId = mailId;
     }
 
-    public String getUsername() {
-        return username;
+    public String getReceiverName() {
+        return receiverName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
     }
 
     public String getContent() {
         return content;
     }
 
-    public String getSender() {
-        return sender;
+    public String getSenderName() {
+        return senderName;
     }
 
     public String getSubject() {
@@ -56,16 +58,16 @@ public class Mail {
         this.content = content;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
-    public Date getSentDate() {
-        return sentDate;
+    public Date getReceiveDate() {
+        return receiveDate;
     }
 
     public List<String> getPaths() {
@@ -76,7 +78,15 @@ public class Mail {
         this.paths = paths;
     }
 
-    public void setSentDate(Date sentDate) {
-        this.sentDate = sentDate;
+    public void setReceiveDate(Date receiveDate) {
+        this.receiveDate = receiveDate;
+    }
+
+    public Date getSendDate() {
+        return sendDate;
+    }
+
+    public void setSendDate(Date sendDate) {
+        this.sendDate = sendDate;
     }
 }

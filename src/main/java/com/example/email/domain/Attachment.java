@@ -2,27 +2,29 @@ package com.example.email.domain;
 
 public class Attachment {
 
-    private int id;
-    private String path;
+    //该附件所属的邮件id
+    private int mailId;
+    //该附件路径
+    private String attachmentPath;
 
-    public Attachment(int id, String path){
-        this.id = id;
-        this.path = path;
+    public Attachment(int mailId, String attachmentPath){
+        this.mailId = mailId;
+        this.attachmentPath = attachmentPath;
     }
 
-    public int getId() {
-        return id;
+    public int getMailId() {
+        return mailId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setMailId(int mailId) {
+        this.mailId = mailId;
     }
 
-    public String getPath() {
-        return path;
+    public String getAttachmentPath() {
+        return attachmentPath;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setAttachmentPath(String attachmentPath) {
+        this.attachmentPath = attachmentPath;
     }
 }

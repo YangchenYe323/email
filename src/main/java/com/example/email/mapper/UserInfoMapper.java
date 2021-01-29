@@ -9,19 +9,24 @@ public interface UserInfoMapper {
 
     @Select("SELECT * FROM user_info")
     @Results({
-            @Result(column = "u_name", property = "username"),
-    }
+            @Result(column = "user_name", property = "userName"),
+            @Result(column = "pop_server", property = "popServer"),
+            @Result(column = "pop_port", property = "popPort"),
+            @Result(column = "smtp_server", property = "smtpServer"),
+            @Result(column = "smtp_port", property = "smtpPort")
+        }
     )
     List<UserInfo> getAll();
 
-    @Insert("INSERT INTO user_info (u_name, password, server, port) VALUES (#{username}, #{password}, #{server}, #{port})")
-    @Options(useGeneratedKeys=true, keyProperty="id", keyColumn="id")
+    @Insert(
+            "INSERT INTO user_info SET " +
+                    "user_name = #{userName}, " +
+                    "password = #{password}, " +
+                    "pop_server = #{popServer}, " +
+                    "pop_port = #{popPort}, " +
+                    "smtp_server = #{smtpServer}, " +
+                    "smtp_port = #{smtpPort}"
+    )
     int insert(UserInfo userInfo);
-
-    @Update("UPDATE user_info SET password = #{password}, server = #{server}, port = #{port} WHERE u_name = #{username}")
-    void update(UserInfo userInfo);
-
-    @Delete("DELETE from user_info WHERE u_name = #{username}")
-    void delete(String username);
 
 }

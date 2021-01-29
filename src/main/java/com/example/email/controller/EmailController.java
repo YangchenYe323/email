@@ -44,8 +44,8 @@ public class EmailController {
 
 
         Mail mail = new Mail();
-        mail.setReceiverName("yye02@email.wm.edus");
-        mail.setReceiverName(user.getUserName());
+        mail.setReceiverName("yye02@email.wm.edu");
+        mail.setSenderName(user.getUserName());
         mail.setSubject("我喜欢你，和我在一起好不好");
         mail.setContent("愚人节快乐");
 

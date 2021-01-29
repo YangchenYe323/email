@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 public class EmailController {
 
@@ -34,6 +40,7 @@ public class EmailController {
     @RequestMapping("/send")
     @ResponseBody
     public String send(){
+        System.out.println((new File("")).getAbsolutePath());
         UserInfo user = new UserInfo();
         user.setUserName("yangchen323@sina.com");
         user.setPassword("4f6c9ead7a16ba31");
@@ -48,7 +55,9 @@ public class EmailController {
         mail.setSenderName(user.getUserName());
         mail.setSubject("我喜欢你，和我在一起好不好");
         mail.setContent("愚人节快乐");
-
+        List<String> paths = new ArrayList<>();
+        paths.add("./src/main/resources/images/IMG_2145.JPG");
+        mail.setPaths(paths);
         try {
             emailClientService.sendMail(user, mail);
         } catch (Exception e){

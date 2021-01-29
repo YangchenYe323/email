@@ -56,14 +56,7 @@ public class EmailClientService {
         emailSender.initialize(userInfo);
         emailSender.connect();
         //判断邮件是否有附件
-        if (mail.getPaths() != null && !mail.getPaths().isEmpty()){
-            emailSender.sendMessageWithAttachment(mail);
-        } else{
-            String receiver = mail.getReceiverName();
-            String subject = mail.getSubject();
-            String content = mail.getContent();
-            emailSender.sendTextMessage(receiver, subject, content);
-        }
+        emailSender.sendMessage(mail);
         emailSender.close();
     }
 
